@@ -1,6 +1,7 @@
 pub mod layers;
 
 pub mod learning {
+<<<<<<< HEAD
     use crate::network::layers::layers_structure::{Layer, LayerBias, LayerDigit, LayerInput};
     use image::{open, DynamicImage, GrayImage, Luma};
     use libm::fabsf;
@@ -84,5 +85,12 @@ pub mod learning {
                 .collect::<Vec<Learning>>()
         }
         pub fn backpropagation_calculus(&mut self) {}
+=======
+    use rand::Rng;
+
+    
+    struct Learning {
+        
+>>>>>>> 2b34d59 (first commit)
     }
 }
