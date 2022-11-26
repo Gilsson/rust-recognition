@@ -2,13 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-<<<<<<< HEAD
-<<<<<<< HEAD
-    <mapping directory="$PROJECT_DIR$/main" vcs="Git" />
-=======
->>>>>>> 2d6f15c (first merging between master and main)
-=======
-    <mapping directory="$PROJECT_DIR$/main" vcs="Git" />
->>>>>>> f69b002 (backpropagation calculus starting)
   </component>
 </project>
