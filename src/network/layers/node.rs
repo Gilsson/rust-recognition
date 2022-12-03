@@ -1,8 +1,5 @@
 pub mod nodes {
-    use crate::network::layers::layers_structure::LayerBias;
-    use libm::exp;
     use rand::Rng;
-    use std::io::Read;
     use std::iter::from_fn;
 
     trait Node {}
@@ -53,7 +50,7 @@ pub mod nodes {
                 weight: from_fn(|| Some(NodeIO::generate_number(2.0)))
                     .take(size)
                     .collect(),
-                bias: NodeIO::generate_number(15.0),
+                bias: NodeIO::generate_number(2.0),
                 output: 0.0,
             }
         }
