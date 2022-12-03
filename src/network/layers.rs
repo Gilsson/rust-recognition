@@ -3,6 +3,7 @@ pub mod node;
 pub mod layers_structure {
     use crate::network::layers::node::nodes::NodeIO;
 <<<<<<< HEAD
+<<<<<<< HEAD
     use libm::exp;
     use std::iter::from_fn;
 
@@ -14,6 +15,13 @@ pub mod layers_structure {
     trait Default {
         fn default(size: usize) -> Self;
 >>>>>>> 2b34d59 (first commit)
+=======
+    use libm::exp;
+    use std::iter::from_fn;
+
+    trait Default {
+        fn default(prev_size: usize, size: usize) -> Self;
+>>>>>>> 6553346 (backpropagation calculus starting)
     }
 
     #[derive(Debug)]
@@ -24,6 +32,9 @@ pub mod layers_structure {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6553346 (backpropagation calculus starting)
     #[derive(Debug)]
     pub struct LayerInput {
         size: usize,
@@ -40,6 +51,7 @@ pub mod layers_structure {
         cost: Vec<f64>,
     }
 
+<<<<<<< HEAD
     impl Default for LayerBias {
         fn default(prev_size: usize, size: usize) -> LayerBias {
             LayerBias {
@@ -64,28 +76,56 @@ pub mod layers_structure {
                 output: -1,
                 cost: Vec::new(),
 =======
+=======
+>>>>>>> 6553346 (backpropagation calculus starting)
     impl Default for LayerBias {
-        fn default(size: usize) -> LayerBias {
+        fn default(prev_size: usize, size: usize) -> LayerBias {
             LayerBias {
                 size,
                 input: Vec::new(),
+<<<<<<< HEAD
                 nodes: from_fn(|| Some(NodeIO::new(size))).take(size).collect(),
 >>>>>>> 2b34d59 (first commit)
+=======
+                nodes: from_fn(|| Some(NodeIO::new(prev_size)))
+                    .take(size)
+                    .collect(),
+            }
+        }
+    }
+
+    impl Default for LayerDigit {
+        fn default(prev_size: usize, size: usize) -> Self {
+            LayerDigit {
+                prev_size: 0,
+                size: 10,
+                input: Vec::new(),
+                nodes: from_fn(|| Some(NodeIO::new(prev_size)))
+                    .take(size)
+                    .collect(),
+                output: -1,
+                cost: Vec::new(),
+>>>>>>> 6553346 (backpropagation calculus starting)
             }
         }
     }
 
     pub trait Layer {
 <<<<<<< HEAD
+<<<<<<< HEAD
         fn new(prev_size: usize, size: usize) -> Self;
 =======
         fn new(size: usize) -> Self;
         fn generate_weight(&mut self);
 >>>>>>> 2b34d59 (first commit)
+=======
+        fn new(prev_size: usize, size: usize) -> Self;
+>>>>>>> 6553346 (backpropagation calculus starting)
         fn fill_input(&mut self, input: Vec<f64>);
     }
 
     impl Layer for LayerBias {
+<<<<<<< HEAD
 <<<<<<< HEAD
         fn new(prev_size: usize, size: usize) -> LayerBias {
             Default::default(prev_size, size)
@@ -96,11 +136,19 @@ pub mod layers_structure {
         }
         fn generate_weight(&mut self) {}
 >>>>>>> 2b34d59 (first commit)
+=======
+        fn new(prev_size: usize, size: usize) -> LayerBias {
+            Default::default(prev_size, size)
+        }
+>>>>>>> 6553346 (backpropagation calculus starting)
         fn fill_input(&mut self, input: Vec<f64>) {
             self.input = input;
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6553346 (backpropagation calculus starting)
 
     impl Layer for LayerDigit {
         fn new(prev_size: usize, size: usize) -> Self {
@@ -138,6 +186,9 @@ pub mod layers_structure {
         fn cost_function(&mut self) {}
         fn error_generate() {}
     }
+<<<<<<< HEAD
 =======
 >>>>>>> 2b34d59 (first commit)
+=======
+>>>>>>> 6553346 (backpropagation calculus starting)
 }
