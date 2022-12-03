@@ -1,7 +1,6 @@
 pub mod layers;
 
 pub mod learning {
-<<<<<<< HEAD
     use crate::network::layers::layers_structure::{Layer, LayerBias, LayerDigit, LayerInput};
     use image::{open, DynamicImage, GrayImage, Luma};
     use libm::fabsf;
@@ -40,57 +39,39 @@ pub mod learning {
             }
         }
 
-        pub fn new(layers: Vec<usize>) -> Vec<Learning> {
-            let mut path = Vec::<String>::new();
-            path = from_fn(|| Some(String::new()))
+        fn next_image() -> GrayImage {
+            let path = from_fn(|| Some(String::new()))
                 .enumerate()
                 .map(|mut x| {
-                    x.1 = x.0.to_string() + ".jpg";
+                    x.1 = 1.to_string() + ".jpg";
                     x.1
                 })
-                .take(5)
-                .collect();
-            //let path = "{i}.jpg";
-            let mut image: Vec<GrayImage> = path
-                .iter()
-                .map(|x| open(x).unwrap().to_luma8())
-                .collect::<Vec<GrayImage>>();
+                .take(1)
+                .collect::<String>();
+            open(path).unwrap().to_luma8()
+        }
+
+        pub fn new(layers: Vec<usize>, path: String) -> Learning {
+            let mut image: GrayImage = open(path).unwrap().to_luma8();
             let mut input: Vec<f64> = Vec::new();
             let mut iter = layers.iter();
-            image
-                .into_iter()
-                .map(|mut x| {
-                    Learning::check_image_field(&mut x, &mut input, (0, 0));
-                    x
-                })
-                .take(5)
-                .collect::<Vec<GrayImage>>();
-            image
-                .into_iter()
-                .map(|x| Learning {
-                    image: x,
-                    layer_input: Rc::new(LayerInput::new(input)),
-                    layer_bias: Rc::new({
-                        from_fn(|| {
-                            Some(LayerBias::new(
-                                *layers.first().unwrap(),
-                                *iter.next().unwrap(),
-                            ))
-                        })
-                        .take(layers.len())
-                        .collect()
-                    }),
-                    layer_digit: Rc::new(LayerDigit::new(*layers.last().unwrap(), 10)),
-                })
-                .collect::<Vec<Learning>>()
+
+            Learning {
+                image,
+                layer_input: Rc::new(LayerInput::new(input)),
+                layer_bias: Rc::new({
+                    from_fn(|| {
+                        Some(LayerBias::new(
+                            *layers.first().unwrap(),
+                            *iter.next().unwrap(),
+                        ))
+                    })
+                    .take(layers.len())
+                    .collect()
+                }),
+                layer_digit: Rc::new(LayerDigit::new(*layers.last().unwrap(), 10)),
+            }
         }
         pub fn backpropagation_calculus(&mut self) {}
-=======
-    use rand::Rng;
-
-    
-    struct Learning {
-        
->>>>>>> 2b34d59 (first commit)
     }
 }

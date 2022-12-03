@@ -2,10 +2,7 @@ pub mod network;
 
 use crate::network::layers;
 use crate::network::layers::layers_structure::Layer;
-<<<<<<< HEAD
 use crate::network::learning::Learning;
-=======
->>>>>>> 2b34d59 (first commit)
 use image::{
     open, DynamicImage, GenericImage, GenericImageView, GrayImage, ImageBuffer, Luma, Rgb, RgbImage,
 };
@@ -14,16 +11,11 @@ use libm::fabsf;
 use std::borrow::{Borrow, BorrowMut};
 
 fn main() {
-<<<<<<< HEAD
-    let mut network = Learning::new(vec![784, 16, 16]);
+    let network = Learning::new(vec![784, 16, 16], "0.jpg".to_string());
     println!("{:?}", network);
-    for i in 0..100 {
-        network.backpropagation_calculus();
-    }
+    //network.into_iter().map(|mut x| x.backpropagation_calculus()).take(1).collect();
+
     /*let mut layer = LayerBias::new(16);
-=======
-    let mut layer = LayerBias::new(16);
->>>>>>> 2b34d59 (first commit)
     let x = 28usize;
     let y = 28usize;
     let path = "20.jpg";
@@ -31,14 +23,9 @@ fn main() {
     let mut input: Vec<f64> = Vec::new();
     check_image_field(&mut bwimage, &mut input, (0, 0));
     layer.fill_input(input);
-<<<<<<< HEAD
     layer.sigmoid();
     println!("{:?}", layer);
     let mut layer = Sigmoid(Box::new());
-=======
-    println!("{:?}", layer);
-    /*let mut layer = Sigmoid(Box::new());
->>>>>>> 2b34d59 (first commit)
     let mut layer_sigmoid: Layers = Layers::new(Layers::LayerSigmoid { Def }, 15);
     layer_sigmoid.fill_elements(&input);
     let mut digit_layer = LayerSigmod::create_layer(&layer_sigmoid);
@@ -55,11 +42,7 @@ fn main() {
      */
 }
 
-<<<<<<< HEAD
 /*fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u32, u32)) {
-=======
-fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u32, u32)) {
->>>>>>> 2b34d59 (first commit)
     if dimensions.1 >= image.width() {
         return;
     }
@@ -81,11 +64,7 @@ fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u
         check_image_field(image, scale, (0, dimensions.1 + image.width() / 7));
     }
 }
-<<<<<<< HEAD
 */
-=======
-
->>>>>>> 2b34d59 (first commit)
 //#[test]
 //fn test_digit() {
 //    let layer = LayerDigits {
