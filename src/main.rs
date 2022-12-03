@@ -2,6 +2,7 @@ pub mod network;
 
 use crate::network::layers;
 use crate::network::layers::layers_structure::Layer;
+use crate::network::learning::Learning;
 use image::{
     open, DynamicImage, GenericImage, GenericImageView, GrayImage, ImageBuffer, Luma, Rgb, RgbImage,
 };
@@ -10,7 +11,12 @@ use libm::fabsf;
 use std::borrow::{Borrow, BorrowMut};
 
 fn main() {
-    let mut layer = LayerBias::new(16);
+    let mut network = Learning::new(vec![784, 16, 16]);
+    println!("{:?}", network);
+    for i in 0..100 {
+        network.backpropagation_calculus();
+    }
+    /*let mut layer = LayerBias::new(16);
     let x = 28usize;
     let y = 28usize;
     let path = "20.jpg";
@@ -18,8 +24,9 @@ fn main() {
     let mut input: Vec<f64> = Vec::new();
     check_image_field(&mut bwimage, &mut input, (0, 0));
     layer.fill_input(input);
+    layer.sigmoid();
     println!("{:?}", layer);
-    /*let mut layer = Sigmoid(Box::new());
+    let mut layer = Sigmoid(Box::new());
     let mut layer_sigmoid: Layers = Layers::new(Layers::LayerSigmoid { Def }, 15);
     layer_sigmoid.fill_elements(&input);
     let mut digit_layer = LayerSigmod::create_layer(&layer_sigmoid);
@@ -36,7 +43,7 @@ fn main() {
      */
 }
 
-fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u32, u32)) {
+/*fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u32, u32)) {
     if dimensions.1 >= image.width() {
         return;
     }
@@ -58,7 +65,7 @@ fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u
         check_image_field(image, scale, (0, dimensions.1 + image.width() / 7));
     }
 }
-
+*/
 //#[test]
 //fn test_digit() {
 //    let layer = LayerDigits {
