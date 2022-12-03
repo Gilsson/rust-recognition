@@ -1,16 +1,5 @@
 pub mod nodes {
-<<<<<<< HEAD
-<<<<<<< HEAD
     use rand::Rng;
-=======
-    use crate::network::layers::layers_structure::LayerBias;
-    use libm::exp;
-    use rand::Rng;
-    use std::io::Read;
->>>>>>> 2b34d59 (first commit)
-=======
-    use rand::Rng;
->>>>>>> 6553346 (backpropagation calculus starting)
     use std::iter::from_fn;
 
     trait Node {}
@@ -61,15 +50,7 @@ pub mod nodes {
                 weight: from_fn(|| Some(NodeIO::generate_number(2.0)))
                     .take(size)
                     .collect(),
-<<<<<<< HEAD
-<<<<<<< HEAD
                 bias: NodeIO::generate_number(2.0),
-=======
-                bias: NodeIO::generate_number(15.0),
->>>>>>> 2b34d59 (first commit)
-=======
-                bias: NodeIO::generate_number(2.0),
->>>>>>> 6553346 (backpropagation calculus starting)
                 output: 0.0,
             }
         }
