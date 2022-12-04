@@ -1,6 +1,8 @@
 pub mod nodes {
     use rand::Rng;
+    use rc::Rc;
     use std::iter::from_fn;
+    use std::rc;
 
     trait Node {}
 
@@ -35,6 +37,7 @@ pub mod nodes {
         pub weight: Vec<f64>,
         pub bias: f64,
         pub output: f64,
+        pub z: f64,
     }
 
     impl RandomGeneration for NodeIO {}
@@ -52,6 +55,7 @@ pub mod nodes {
                     .collect(),
                 bias: NodeIO::generate_number(2.0),
                 output: 0.0,
+                z: 0.0,
             }
         }
     }

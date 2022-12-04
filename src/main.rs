@@ -9,10 +9,15 @@ use image::{
 use layers::layers_structure::LayerBias;
 use libm::fabsf;
 use std::borrow::{Borrow, BorrowMut};
+use std::fs::File;
+use std::io::{BufWriter, Write};
 
 fn main() {
-    let network = Learning::new(vec![784, 16, 16], "0.jpg".to_string());
-    println!("{:?}", network);
+    let mut network = Learning::new(vec![784, 15, 15], "0.jpg".to_string());
+    let mut file = File::create("test.txt").expect("Some message");
+
+    network.backpropagation_calculus();
+    writeln!(file, "{:?}", network).expect("Some");
     //network.into_iter().map(|mut x| x.backpropagation_calculus()).take(1).collect();
 
     /*let mut layer = LayerBias::new(16);
