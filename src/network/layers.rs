@@ -2,7 +2,7 @@ pub mod node;
 
 pub mod layers_structure {
     use libm::sqrt;
-    use ndarray::{Array, Array1, Array2, Ix1};
+    use ndarray::{Array, Array1, Array2, ArrayView, ArrayView1, Ix1};
     use num_complex::ComplexFloat;
     use rand::distributions::Distribution;
     use rand::thread_rng;
@@ -103,12 +103,9 @@ pub mod layers_structure {
     }
 
     impl Layer {
-        pub fn delta(&self, out: &Array1<f32>, desired_out: &Array1<f32>) -> Array2<f32> {
-            Array2::from_shape_vec((1, out.len()), {
-                let a = out - desired_out;
-                a.to_vec()
-            })
-            .unwrap()
+        pub fn delta(&self, out: &ArrayView1<f32>, desired_out: &Array1<f32>) -> Array2<f32> {
+            let v: Array1<f32> = out.to_owned() - desired_out.to_owned();
+            Array2::from_shape_vec((v.len(), 1), v.into_raw_vec()).unwrap()
         }
         pub fn new(prev_size: usize, cur_size: usize, layer_type: LayerType) -> Layer {
             Layer {

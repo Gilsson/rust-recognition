@@ -5,6 +5,7 @@ pub mod learning {
     use libm::exp;
     use ndarray::prelude::*;
     use rand::prelude::*;
+    use std::borrow::Borrow;
 
     #[derive(Debug)]
     pub struct Learning {
@@ -114,7 +115,7 @@ pub mod learning {
                 for mini_batch in self.input.clone().iter() {
                     self.update_mini_batch(mini_batch, self.learning_rate, self.lambda, 50_000);
                     println!("Epoch complete, proceed");
-                    println!("Accuracy: {}", self.check_accuracy());
+                    //println!("Accuracy: {}", self.check_accuracy());
                 }
             }
         }
@@ -126,30 +127,71 @@ pub mod learning {
             lambda: f32,
             train_size: usize,
         ) {
-            let mut nabla_w = Array1::<Array2<f32>>::default(self.layers.len());
-            let mut nabla_b = Array1::<Array2<f32>>::default(self.layers.len());
+            let mut nabla_w = {
+                let mut a: Array1<Array2<f32>> = Array1::from_vec({
+                    let mut b = vec![];
+                    b.push(Array2::zeros((1, 1)));
+                    for i in self.layers.iter().map(|x| (x.weights.raw_dim())) {
+                        b.push(Array2::<f32>::zeros(i));
+                    }
+                    b
+                });
+                a
+            };
+            let mut nabla_b = {
+                let a: Array1<Array2<f32>> = Array1::from_vec({
+                    let mut b = vec![];
+                    b.push(Array2::zeros((1, 1)));
+                    for i in self.layers.iter().map(|x| x.biases.len()) {
+                        b.push(Array2::zeros((1, i)));
+                    }
+                    b
+                });
+                a
+            };
+            //println!("\n \n {:?}", nabla_w.last().unwrap());
             for (x, y) in mini_batch {
                 let (delta_w, delta_b) = self.backprop(x, y);
+                //println!("\n \n \n{delta_w:?}");
+                //println!("\n \n \n {:?}", nabla_w);
                 nabla_b = nabla_b
                     .into_iter()
                     .zip(delta_b)
-                    .map(|x| x.0 + x.1)
+                    .map(|x| x.0 + &x.1.t())
                     .collect();
+                //println!("{:?}", nabla_b);
                 nabla_w = nabla_w
                     .into_iter()
                     .zip(delta_w)
                     .map(|x| x.0 + x.1)
-                    .collect()
+                    .collect();
             }
-            self.layers.iter_mut().zip(nabla_w).for_each(|x| {
-                x.0.weights = (1.0 - learning_rate * (lambda / train_size as f32)) * &x.0.weights
-                    - (learning_rate / mini_batch.len() as f32) * &x.1;
-            });
-            self.layers.iter_mut().zip(nabla_b).for_each(|x| {
-                x.0.biases = &x.0.biases
-                    - (learning_rate / mini_batch.len() as f32)
-                        * &Array1::from_vec(x.1.into_raw_vec());
-            });
+            let len = self.sizes.len();
+            self.layers
+                .iter_mut()
+                .rev()
+                .take(len - 1)
+                .zip(nabla_w.iter().rev())
+                .for_each(|x| {
+                    let a = (1.0 - learning_rate * (lambda / train_size as f32)) * &x.0.weights;
+                    x.0.weights
+                        .iter_mut()
+                        .for_each(|x| *x *= (learning_rate / mini_batch.len() as f32));
+                    println!("{:?}", x.0.weights);
+                    x.0.weights = x.0.weights.dot(&x.1.t());
+                });
+            self.layers
+                .iter_mut()
+                .rev()
+                .take(len - 1)
+                .zip(nabla_b.iter().rev())
+                .for_each(|x| {
+                    println!("{:?}", x.0.biases);
+                    println!("{:?}", x.1);
+                    x.0.biases = &x.0.biases
+                        - (learning_rate / mini_batch.len() as f32)
+                            * Array1::from_vec(x.1.to_owned().into_raw_vec());
+                });
         }
 
         fn feedforward(&self, input: &Array1<f32>) -> Array1<f32> {
@@ -166,9 +208,9 @@ pub mod learning {
             x: &Array1<f32>,
             y: &Array1<f32>,
         ) -> (Array1<Array2<f32>>, Array1<Array2<f32>>) {
-            let mut nabla_b: Array1<Array2<f32>> = Array1::default(self.layers.len());
-            let mut nabla_w: Array1<Array2<f32>> = Array1::default(self.layers.len());
-            let mut activations: Vec<Array1<f32>> = Vec::with_capacity(self.layers.len());
+            let mut nabla_b: Array1<Array2<f32>> = Array1::default(self.sizes.len());
+            let mut nabla_w: Array1<Array2<f32>> = Array1::default(self.sizes.len());
+            let mut activations: Vec<Array1<f32>> = Vec::with_capacity(self.sizes.len());
             let mut activation = x.clone();
             activations.push(activation.to_owned());
             for it in self.layers.iter_mut() {
@@ -180,25 +222,45 @@ pub mod learning {
                 .layers
                 .last()
                 .unwrap()
-                .delta(activations.last().unwrap(), y);
-            println!("{:?}", delta);
-            nabla_b[self.layers.len() - 1] = delta.clone();
+                .delta(&activations.last().unwrap().t(), y);
+            nabla_b[self.sizes.len() - 1] =
+                Array2::from_shape_vec((delta.len(), 1), delta.clone().into_raw_vec()).unwrap();
             let a = &Array2::from_shape_vec(
-                (1, activations.last().unwrap().len()),
-                activations.last().unwrap().to_vec(),
+                (activations[self.sizes.len() - 2].len(), 1),
+                activations[self.sizes.len() - 2].to_vec(),
             )
             .unwrap();
-            nabla_w[self.layers.len() - 1] = delta.dot(&a.t());
-            println!("{:?}", nabla_w[self.layers.len() - 1]);
-            for l in (1..self.layers.len()).rev() {
-                delta = self.layers[l].weights.t().dot(&delta);
-                delta = delta * Self::sigmoid_prime(&self.layers[l - 1].z_vec.view()).t();
-                nabla_b[l] = delta.clone();
-                let a = &Array2::from_shape_vec((1, activations[l].len()), activations[l].to_vec())
-                    .unwrap();
-                nabla_w[l] = delta.dot(&a.t());
-                println!("{:?}", nabla_w[l]);
+            nabla_w[self.sizes.len() - 1] =
+                Array2::from_shape_vec((10, 1), delta.clone().into_raw_vec())
+                    .unwrap()
+                    .to_owned();
+            nabla_w[self.sizes.len() - 1] = nabla_w[self.sizes.len() - 1]
+                .dot(&a.t())
+                .to_shared()
+                .reshape(self.layers.last().unwrap().weights.raw_dim())
+                .to_owned();
+            for l in (2..self.sizes.len()) {
+                delta = self.layers[self.layers.len() - l + 1]
+                    .weights
+                    .t()
+                    .dot(&delta);
+                delta
+                    .iter_mut()
+                    .zip(Self::sigmoid_prime(&self.layers[self.layers.len() - l].z_vec.view()).t())
+                    .for_each(|x| *x.0 *= *x.1);
+                nabla_b[self.sizes.len() - l] =
+                    Array2::from_shape_vec(delta.raw_dim(), delta.clone().into_raw_vec()).unwrap();
+                let mut a = &Array2::from_shape_vec(
+                    (activations[self.sizes.len() - l - 1].len(), 1),
+                    activations[self.sizes.len() - l - 1].to_vec(),
+                )
+                .unwrap();
+                let b = delta.dot(&a.t());
+                nabla_w[self.sizes.len() - l] =
+                    Array2::from_shape_vec(b.raw_dim(), b.into_raw_vec()).unwrap();
             }
+            nabla_b[0] = Array2::zeros((1, 1));
+            nabla_w[0] = Array2::zeros((1, 1));
             (nabla_w, nabla_b)
         }
 
