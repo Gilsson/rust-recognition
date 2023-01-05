@@ -129,9 +129,9 @@ pub mod learning {
         ) {
             let mut nabla_w = {
                 let mut a: Array1<Array2<f32>> = Array1::from_vec({
-                    let mut b = vec![];
+                    let mut b: Vec<Array2<f32>> = vec![];
                     b.push(Array2::zeros((1, 1)));
-                    for i in self.layers.iter().map(|x| (x.weights.raw_dim())) {
+                    for i in self.layers.iter().map(|x| (x.weights.raw_dim().f())) {
                         b.push(Array2::<f32>::zeros(i));
                     }
                     b
@@ -152,19 +152,20 @@ pub mod learning {
             //println!("\n \n {:?}", nabla_w.last().unwrap());
             for (x, y) in mini_batch {
                 let (delta_w, delta_b) = self.backprop(x, y);
-                //println!("\n \n \n{delta_w:?}");
+                println!("\n \n \n{delta_w:?}");
                 //println!("\n \n \n {:?}", nabla_w);
                 nabla_b = nabla_b
                     .into_iter()
                     .zip(delta_b)
                     .map(|x| x.0 + &x.1.t())
                     .collect();
-                //println!("{:?}", nabla_b);
                 nabla_w = nabla_w
                     .into_iter()
                     .zip(delta_w)
                     .map(|x| x.0 + x.1)
                     .collect();
+
+                println!("{:?}", self.layers.last().unwrap().weights);
             }
             let len = self.sizes.len();
             self.layers
@@ -174,11 +175,7 @@ pub mod learning {
                 .zip(nabla_w.iter().rev())
                 .for_each(|x| {
                     let a = (1.0 - learning_rate * (lambda / train_size as f32)) * &x.0.weights;
-                    x.0.weights
-                        .iter_mut()
-                        .for_each(|x| *x *= (learning_rate / mini_batch.len() as f32));
-                    println!("{:?}", x.0.weights);
-                    x.0.weights = x.0.weights.dot(&x.1.t());
+                    x.0.weights = a - x.1 * (learning_rate / mini_batch.len() as f32);
                 });
             self.layers
                 .iter_mut()
@@ -230,15 +227,20 @@ pub mod learning {
                 activations[self.sizes.len() - 2].to_vec(),
             )
             .unwrap();
+            let v = self.layers.last().unwrap().weights.raw_dim().f();
             nabla_w[self.sizes.len() - 1] =
                 Array2::from_shape_vec((10, 1), delta.clone().into_raw_vec())
                     .unwrap()
                     .to_owned();
+
             nabla_w[self.sizes.len() - 1] = nabla_w[self.sizes.len() - 1]
                 .dot(&a.t())
                 .to_shared()
                 .reshape(self.layers.last().unwrap().weights.raw_dim())
                 .to_owned();
+            nabla_w[self.sizes.len() - 1] =
+                Array2::from_shape_vec(v, nabla_w[self.sizes.len() - 1].clone().into_raw_vec())
+                    .unwrap();
             for l in (2..self.sizes.len()) {
                 delta = self.layers[self.layers.len() - l + 1]
                     .weights
@@ -259,6 +261,7 @@ pub mod learning {
                 nabla_w[self.sizes.len() - l] =
                     Array2::from_shape_vec(b.raw_dim(), b.into_raw_vec()).unwrap();
             }
+            println!("{:?}", nabla_w.last());
             nabla_b[0] = Array2::zeros((1, 1));
             nabla_w[0] = Array2::zeros((1, 1));
             (nabla_w, nabla_b)
