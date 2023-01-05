@@ -1,62 +1,56 @@
 pub mod nodes {
-    use rand::Rng;
-    use rc::Rc;
+    use libm::exp;
+    use rand::prelude::*;
+    use rand_distr::Normal;
+    use std::cell::RefCell;
+    use std::cmp::max;
     use std::iter::from_fn;
-    use std::rc;
+    use std::sync::Arc;
 
-    trait Node {}
-
-    pub trait RandomGeneration {
-        fn generate_number(upper_case: f64) -> f64 {
-            let mut rng_gen = rand::thread_rng();
-            rng_gen.gen_range(0.0..upper_case)
-        }
-        fn generate_range(size: usize, upper_case: f64) -> Option<Vec<f64>> {
-            let mut rng_gen = rand::thread_rng();
-            let matching = if upper_case > 0.0 && upper_case < 0.1 {
-                0
-            } else {
-                1
-            };
-            match size {
-                0 => None,
-                _ => match matching {
-                    0 => Some(from_fn(|| Some(rng_gen.gen::<f64>())).take(size).collect()),
-                    _ => Some(
-                        from_fn(|| Some(rng_gen.gen_range(0.0..upper_case)))
-                            .take(size)
-                            .collect(),
-                    ),
-                },
-            }
-        }
-    }
-    #[derive(Debug, Default)]
-    pub struct NodeIO {
-        pub input: Vec<f64>,
-        pub weight: Vec<f64>,
-        pub bias: f64,
-        pub output: f64,
-        pub z: f64,
+    #[derive(Debug, Clone)]
+    enum OutType {
+        Sigmoid,
+        ReLU,
     }
 
-    impl RandomGeneration for NodeIO {}
+    /*impl RandomGeneration for Node {}
 
-    impl NodeIO {
-        pub fn new(size: usize) -> NodeIO {
-            NodeIO {
-                input: {
-                    let mut input = Vec::<f64>::new();
-                    input.resize(size, 0.0);
+    impl Node {
+        pub fn new(prev_layer_size: usize, out_type: OutType) -> Node {
+            Node {
+                out_type,
+                input: Arc::new({
+                    let mut input = Vec::<f32>::new();
+                    input.resize(prev_layer_size, 0.0);
                     input
-                },
-                weight: from_fn(|| Some(NodeIO::generate_number(2.0)))
-                    .take(size)
-                    .collect(),
-                bias: NodeIO::generate_number(2.0),
+                }),
+                weight: Box::new(
+                    Node::generate_range(
+                        prev_layer_size,
+                        0.0,
+                        1.0 / f32::sqrt(prev_layer_size as f32),
+                    )
+                    .unwrap(),
+                ),
+                bias: Node::generate_number(0.0, 1.0),
+                error: Box::new(from_fn(|| Some(0.0)).take(prev_layer_size).collect()),
                 output: 0.0,
                 z: 0.0,
             }
         }
-    }
+        fn init(&mut self) {
+            self.z = {
+                let mut z = 0.0;
+                for it in self.input.iter().zip(self.weight.iter()) {
+                    let (input, weight) = it;
+                    z += *input * *weight + self.bias;
+                }
+                z
+            };
+            match self.out_type {
+                OutType::Sigmoid => self.output = 1.0 / (1.0 + exp(-self.z as f64)) as f32,
+                OutType::ReLU => self.output = f32::max(0.0, self.z),
+            }
+        }
+    }*/
 }

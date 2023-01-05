@@ -1,51 +1,73 @@
 pub mod network;
 
-use crate::network::layers;
-use crate::network::layers::layers_structure::Layer;
 use crate::network::learning::Learning;
-use image::{
-    open, DynamicImage, GenericImage, GenericImageView, GrayImage, ImageBuffer, Luma, Rgb, RgbImage,
-};
-use layers::layers_structure::LayerBias;
-use libm::fabsf;
-use std::borrow::{Borrow, BorrowMut};
+use mnist::MnistBuilder;
+//use ndarray::Array2;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::Read;
 
 fn main() {
-    let mut network = Learning::new(vec![784, 15, 15], "0.jpg".to_string());
+    let mut mnist = MnistBuilder::new()
+        .label_format_one_hot()
+        .training_set_length(50_000)
+        .validation_set_length(10_000)
+        .test_set_length(10_000)
+        .finalize();
+    let mut slice: Vec<f32> = mnist
+        .trn_img
+        .into_iter()
+        .map(|x| x as f32 / 256.0 as f32)
+        .collect();
+    let mut answer: Vec<f32> = mnist.trn_lbl.into_iter().map(|x| x as f32).collect();
+    //println!("{:?}", mnist.trn_lbl);
+    let mut network = Learning::new(
+        slice,
+        answer,
+        vec![784, 30, 20, 10],
+        10, /* usize */
+        0.1,
+        0.5, /* f32 */
+        30,  /* usize */
+    );
+    network.stochastic_gradient_descent();
+    //println!("{:?}", network);
     let mut file = File::create("test.txt").expect("Some message");
-
-    network.backpropagation_calculus();
-    writeln!(file, "{:?}", network).expect("Some");
-    //network.into_iter().map(|mut x| x.backpropagation_calculus()).take(1).collect();
-
-    /*let mut layer = LayerBias::new(16);
-    let x = 28usize;
-    let y = 28usize;
-    let path = "20.jpg";
-    let mut bwimage = open(path).unwrap().to_luma8();
-    let mut input: Vec<f64> = Vec::new();
-    check_image_field(&mut bwimage, &mut input, (0, 0));
-    layer.fill_input(input);
-    layer.sigmoid();
-    println!("{:?}", layer);
-    let mut layer = Sigmoid(Box::new());
-    let mut layer_sigmoid: Layers = Layers::new(Layers::LayerSigmoid { Def }, 15);
-    layer_sigmoid.fill_elements(&input);
-    let mut digit_layer = LayerSigmod::create_layer(&layer_sigmoid);
-    println!("{}", digit_layer.get_most_valuable_digit());
-    loop {
-        layer_sigmoid.fill_elements(&input);
-        layer_sigmoid.change_weights(&digit_layer);
-        let mut digit_layer = LayerDigits::create_layer(&layer_sigmoid);
-        println!("{:?}", digit_layer);
-        println!("{}", digit_layer.get_most_valuable_digit());
+    /* writeln!(file, "{:?}", network.layer_bias.get(1).unwrap()).expect("Some");
+    for _ in 0..=5 {
+        network.backpropagation_calculus();
+        writeln!(file, "\n \n \n \n \n").expect("Some");
+        writeln!(file, "{:?}", network.layer_bias.get(1).unwrap()).expect("Some");
     }
-    bwimage.save("test.png").unwrap();
-    // Save the image as “fractal.png”, the format is deduced from the path
-     */
+
+    writeln!(file, "\n \n \n \n \n").expect("Some");
+    writeln!(file, "{:?}", network.layer_bias.get(1).unwrap()).expect("Some");
+    //network.into_iter().map(|mut x| x.backpropagation_calculus()).take(1).collect();*/
 }
+/*let mut layer = LayerBias::new(16);
+let x = 28usize;
+let y = 28usize;
+let path = "20.jpg";
+let mut bwimage = open(path).unwrap().to_luma8();
+let mut input: Vec<f64> = Vec::new();
+check_image_field(&mut bwimage, &mut input, (0, 0));
+layer.fill_input(input);
+layer.sigmoid();
+println!("{:?}", layer);
+let mut layer = Sigmoid(Box::new());
+let mut layer_sigmoid: Layers = Layers::new(Layers::LayerSigmoid { Def }, 15);
+layer_sigmoid.fill_elements(&input);
+let mut digit_layer = LayerSigmod::create_layer(&layer_sigmoid);
+println!("{}", digit_layer.get_most_valuable_digit());
+loop {
+    layer_sigmoid.fill_elements(&input);
+    layer_sigmoid.change_weights(&digit_layer);
+    let mut digit_layer = LayerDigits::create_layer(&layer_sigmoid);
+    println!("{:?}", digit_layer);
+    println!("{}", digit_layer.get_most_valuable_digit());
+}
+bwimage.save("test.png").unwrap();
+// Save the image as “fractal.png”, the format is deduced from the path
+ */
 
 /*fn check_image_field(image: &mut GrayImage, scale: &mut Vec<f64>, dimensions: (u32, u32)) {
     if dimensions.1 >= image.width() {
