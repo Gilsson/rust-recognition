@@ -23,7 +23,7 @@ fn main() {
     let mut network = Learning::new(
         slice,
         answer,
-        vec![784, 30, 20, 10],
+        vec![784, 30, 10],
         10, /* usize */
         0.1,
         0.5, /* f32 */

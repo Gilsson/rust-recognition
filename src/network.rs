@@ -115,7 +115,7 @@ pub mod learning {
                 for mini_batch in self.input.clone().iter() {
                     self.update_mini_batch(mini_batch, self.learning_rate, self.lambda, 50_000);
                     println!("Epoch complete, proceed");
-                    //println!("Accuracy: {}", self.check_accuracy());
+                    println!("Accuracy: {}", self.check_accuracy());
                 }
             }
         }
@@ -152,7 +152,6 @@ pub mod learning {
             //println!("\n \n {:?}", nabla_w.last().unwrap());
             for (x, y) in mini_batch {
                 let (delta_w, delta_b) = self.backprop(x, y);
-                println!("\n \n \n{delta_w:?}");
                 //println!("\n \n \n {:?}", nabla_w);
                 nabla_b = nabla_b
                     .into_iter()
@@ -164,8 +163,6 @@ pub mod learning {
                     .zip(delta_w)
                     .map(|x| x.0 + x.1)
                     .collect();
-
-                println!("{:?}", self.layers.last().unwrap().weights);
             }
             let len = self.sizes.len();
             self.layers
@@ -183,8 +180,6 @@ pub mod learning {
                 .take(len - 1)
                 .zip(nabla_b.iter().rev())
                 .for_each(|x| {
-                    println!("{:?}", x.0.biases);
-                    println!("{:?}", x.1);
                     x.0.biases = &x.0.biases
                         - (learning_rate / mini_batch.len() as f32)
                             * Array1::from_vec(x.1.to_owned().into_raw_vec());
@@ -261,7 +256,6 @@ pub mod learning {
                 nabla_w[self.sizes.len() - l] =
                     Array2::from_shape_vec(b.raw_dim(), b.into_raw_vec()).unwrap();
             }
-            println!("{:?}", nabla_w.last());
             nabla_b[0] = Array2::zeros((1, 1));
             nabla_w[0] = Array2::zeros((1, 1));
             (nabla_w, nabla_b)
