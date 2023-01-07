@@ -2,8 +2,7 @@ pub mod node;
 
 pub mod layers_structure {
     use libm::sqrt;
-    use ndarray::{Array, Array1, Array2, ArrayView, ArrayView1, Ix1};
-    use num_complex::ComplexFloat;
+    use ndarray::{Array, Array1, Array2, ArrayView1};
     use rand::distributions::Distribution;
     use rand::thread_rng;
     use rand_distr::Normal;
@@ -58,12 +57,8 @@ pub mod layers_structure {
                     Array2::from_shape_vec(
                         (5, 5),
                         a.into_iter()
-                            .map(|mut i| {
-                                i = LayerType::generate_number(
-                                    0.0,
-                                    1.0 / sqrt(prev_size as f64) as f32,
-                                );
-                                i
+                            .map(|_| {
+                                LayerType::generate_number(0.0, 1.0 / sqrt(prev_size as f64) as f32)
                             })
                             .collect(),
                     )
@@ -75,12 +70,8 @@ pub mod layers_structure {
                     Array2::from_shape_vec(
                         a.raw_dim(),
                         a.into_iter()
-                            .map(|mut i| {
-                                i = LayerType::generate_number(
-                                    0.0,
-                                    1.0 / sqrt(prev_size as f64) as f32,
-                                );
-                                i
+                            .map(|_| {
+                                LayerType::generate_number(0.0, 1.0 / sqrt(prev_size as f64) as f32)
                             })
                             .collect(),
                     )

@@ -2,36 +2,35 @@ pub mod network;
 
 use crate::network::learning::Learning;
 use mnist::MnistBuilder;
-//use ndarray::Array2;
-use std::fs::File;
-use std::io::Read;
 
 fn main() {
-    let mut mnist = MnistBuilder::new()
+    let mnist = MnistBuilder::new()
         .label_format_one_hot()
-        .training_set_length(50_000)
-        .validation_set_length(10_000)
-        .test_set_length(10_000)
+        .training_set_length(70_000)
+        .validation_set_length(0)
+        .test_set_length(0)
         .finalize();
-    let mut slice: Vec<f32> = mnist
+    let slice: Vec<f32> = mnist
         .trn_img
         .into_iter()
-        .map(|x| x as f32 / 256.0 as f32)
+        .map(|x| x as f32 / 256.0)
         .collect();
-    let mut answer: Vec<f32> = mnist.trn_lbl.into_iter().map(|x| x as f32).collect();
+    let answer: Vec<f32> = mnist.trn_lbl.into_iter().map(|x| x as f32).collect();
     //println!("{:?}", mnist.trn_lbl);
     let mut network = Learning::new(
         slice,
         answer,
-        vec![784, 30, 10],
-        10, /* usize */
-        0.1,
-        0.5, /* f32 */
-        30,  /* usize */
+        vec![784, 40, 10],
+        2, /* usize */
+        0.5,
+        2.0, /* f32 */
+        50,  /* usize */
     );
-    network.stochastic_gradient_descent();
+    unsafe {
+        network.stochastic_gradient_descent();
+    }
     //println!("{:?}", network);
-    let mut file = File::create("test.txt").expect("Some message");
+    //let mut file = File::create("test.txt").expect("Some message");
     /* writeln!(file, "{:?}", network.layer_bias.get(1).unwrap()).expect("Some");
     for _ in 0..=5 {
         network.backpropagation_calculus();
